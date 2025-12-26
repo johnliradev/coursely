@@ -1,0 +1,135 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum PaymentMethod {
+  PIX
+  CREDIT_CARD
+  DEBIT_CARD
+  PAYPAL
+}
+
+model User {
+  @@map("users")
+  id        Int      @id @default(autoincrement())
+  name      String   
+  phone     String   @unique 
+  email     String   @unique
+  hashPassword  String   @map("hash_password")
+  role      Role     @default(USER) @map("role")
+  createdAt DateTime @default(now()) @map("created_at")
+  orders Order[]
+  payments Payment[]
+  
+  @@index([role])
+  @@index([createdAt])
+}
+
+model Category {
+  @@map("categories")
+  id        Int      @id @default(autoincrement())
+  name      String   @unique 
+  createdAt DateTime @default(now()) @map("created_at")
+  products Product[]
+}
+
+model Product {
+  @@map("products")
+  id        Int      @id @default(autoincrement())
+  title     String   
+  categoryId Int      @map("category_id")
+  category  Category @relation(fields: [categoryId], references: [id])
+  imageUrl  String   @map("image_url")
+  active    Boolean  @default(true) @map("active")
+  description String
+  price     Decimal     
+  createdAt DateTime @default(now()) @map("created_at")
+  orderItems OrderItem[]
+  
+  @@index([categoryId])
+  @@index([active])
+  @@index([categoryId, active])
+  @@index([createdAt])
+}
+
+model Order {
+  @@map("orders")
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  totalPrice Decimal      @map("total_price")
+  status    OrderStatus   @default(PENDING) @map("status")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id])
+  orderItems OrderItem[]
+  payment   Payment?
+  
+  @@index([userId])
+  @@index([status])
+  @@index([userId, status])
+  @@index([createdAt])
+  @@index([userId, createdAt])
+}
+
+model OrderItem {
+  @@map("order_items")
+  id        Int      @id @default(autoincrement())
+  orderId   Int      @map("order_id")
+  productId Int      @map("product_id")
+  quantity  Int      @map("quantity")
+  createdAt DateTime @default(now()) @map("created_at")
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  @@unique([orderId, productId])
+  @@index([orderId])
+  @@index([productId])
+}
+
+model Payment {
+  @@map("payments")
+  id        Int      @id @default(autoincrement())
+  amount    Decimal      @map("amount")
+  status    PaymentStatus   @default(PENDING) @map("status")
+  createdAt DateTime @default(now()) @map("created_at")
+  orderId   Int      @unique @map("order_id")
+  paymentMethod PaymentMethod @default(PIX) @map("payment_method")
+  transactionId String? @map("transaction_id") @unique
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  userId    Int?     @map("user_id")
+  user      User?    @relation(fields: [userId], references: [id])
+  gateway   String? @map("gateway")
+  gatewayTransactionId String? @map("gateway_transaction_id") @unique
+  @@index([userId])
+  @@index([status])
+  @@index([paymentMethod])
+  @@index([createdAt])
+  @@index([userId, status])
+}
