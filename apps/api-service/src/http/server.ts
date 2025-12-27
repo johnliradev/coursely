@@ -5,10 +5,10 @@ const main = async () => {
   let server;
   try {
     server = await buildServer();
-    await server.listen({ host: env.HOST, port: env.PORT });
-    server.log.info(`🔥 Server is running on ${env.HOST}:${env.PORT}`);
+    await server.listen({ host: env.HOST, port: env.API_PORT });
+    server.log.info(`🔥 Server is running on ${env.HOST}:${env.API_PORT}`);
     server.log.info(
-      `🔍 API documentation is available at http://${env.HOST}:${env.PORT}/api/docs`
+      `🔍 API documentation is available at http://${env.HOST}:${env.API_PORT}/api/docs`
     );
   } catch (error) {
     if (server) {

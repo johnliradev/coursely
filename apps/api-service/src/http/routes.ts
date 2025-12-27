@@ -1,7 +1,9 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import z from "zod";
+import { rAuth } from "../modules/auth/auth.routes";
 
 export const r = (server: FastifyInstance) => {
+  rAuth(server);
   server.get(
     "/health",
     {

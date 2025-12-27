@@ -4,7 +4,7 @@ import {
   validatorCompiler,
   type ZodTypeProvider,
 } from "fastify-type-provider-zod";
-// import { errorHandler } from "../http/err/error-handler";
+import { errorHandler } from "../../http/errors/error-handler";
 import { env } from "../../config/env";
 import { registerPlugins } from "./plugins";
 
@@ -17,8 +17,8 @@ server.setSerializerCompiler(serializerCompiler);
 
 export const buildServer = async () => {
   try {
-    server.log.info(`Server is starting on ${env.HOST}:${env.PORT}`);
-    // await server.setErrorHandler(errorHandler);
+    server.log.info(`Server is starting on ${env.HOST}:${env.API_PORT}`);
+    await server.setErrorHandler(errorHandler);
     await registerPlugins(server);
     await server.ready();
     return server;
