@@ -20,6 +20,7 @@ export const authControllers = {
     const token = await server.jwt.sign(
       {
         sub: user.id,
+        role: user.role,
       },
       {
         expiresIn: "1h",

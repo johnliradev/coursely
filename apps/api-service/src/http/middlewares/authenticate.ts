@@ -11,7 +11,7 @@ export const authenticate = async (req: FastifyRequest, res: FastifyReply) => {
   if (!decoded || typeof decoded === "string") {
     throw new UnauthorizedError("Unauthorized");
   }
-  req.user = decoded as { sub: number };
+  req.user = decoded as { sub: number; role: "ADMIN" | "USER" };
 };
 
 export default authenticate;
