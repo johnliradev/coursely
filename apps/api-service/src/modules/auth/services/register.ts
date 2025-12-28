@@ -33,7 +33,7 @@ export const register = async (
       email: input.email,
       phone: input.phone,
       hashPassword: hashedPassword,
-      role: Role.USER,
+      role: input.role,
     },
     select: {
       id: true,
