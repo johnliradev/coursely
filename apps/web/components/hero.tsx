@@ -1,9 +1,13 @@
+"use client";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import { useSearch } from "@/contexts/search-context";
 
 export const Hero = () => {
+  const { searchQuery, setSearchQuery } = useSearch();
+
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4">
+    <div className="bg-background flex flex-col items-center justify-center px-4 py-12">
       <div className="flex flex-col items-center gap-6 w-full max-w-2xl">
         {/* Title */}
         <h1 className="text-5xl md:text-6xl font-bold text-foreground text-center">
@@ -21,6 +25,8 @@ export const Hero = () => {
           <Input
             type="search"
             placeholder="Search Courses"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 h-12 text-base"
           />
         </div>

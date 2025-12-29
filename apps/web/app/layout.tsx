@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import { CategoriesProvider } from "@/contexts/categories-context";
+import { SearchProvider } from "@/contexts/search-context";
+import { ProductsProvider } from "@/contexts/products-context";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -31,7 +34,15 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="flex flex-col min-h-screen">{children}</div>
+          <CategoriesProvider>
+            <SearchProvider>
+              <ProductsProvider>
+                <div className="flex flex-col min-h-screen gap-8">
+                  {children}
+                </div>
+              </ProductsProvider>
+            </SearchProvider>
+          </CategoriesProvider>
         </ThemeProvider>
       </body>
     </html>
