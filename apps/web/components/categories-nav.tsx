@@ -4,12 +4,18 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export const CategoriesNav = () => {
-  const { categories, isLoading, error, selectedCategoryId, setSelectedCategoryId } = useCategories();
+  const {
+    categories,
+    isLoading,
+    error,
+    selectedCategoryId,
+    setSelectedCategoryId,
+  } = useCategories();
 
   if (isLoading) {
     return (
       <nav className="w-full">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto ">
           <p className="text-muted-foreground">Loading categories...</p>
         </div>
       </nav>
@@ -19,7 +25,7 @@ export const CategoriesNav = () => {
   if (error) {
     return (
       <nav className="w-full">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto ">
           <p className="text-destructive">Error: {error}</p>
         </div>
       </nav>
@@ -28,7 +34,7 @@ export const CategoriesNav = () => {
 
   return (
     <nav className="mx-auto">
-      <div className="container mx-auto px-4 py-4">
+      <div className="container mx-auto ">
         <div className="flex items-center gap-2 overflow-x-auto pb-2">
           <Button
             variant="ghost"
