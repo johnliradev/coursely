@@ -4,7 +4,9 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { CategoriesProvider } from "@/contexts/categories-context";
 import { SearchProvider } from "@/contexts/search-context";
+import { UserProvider } from "@/contexts/user-context";
 import { ProductsProvider } from "@/contexts/products-context";
+import { Footer } from "@/components/footer";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -34,13 +36,18 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <CategoriesProvider>
-            <SearchProvider>
-              <ProductsProvider>
-                <div className="flex flex-col min-h-screen">{children}</div>
-              </ProductsProvider>
-            </SearchProvider>
-          </CategoriesProvider>
+          <UserProvider>
+            <CategoriesProvider>
+              <SearchProvider>
+                <ProductsProvider>
+                  <div className="flex flex-col min-h-screen">
+                    <main className="flex-1">{children}</main>
+                    <Footer />
+                  </div>
+                </ProductsProvider>
+              </SearchProvider>
+            </CategoriesProvider>
+          </UserProvider>
         </ThemeProvider>
       </body>
     </html>

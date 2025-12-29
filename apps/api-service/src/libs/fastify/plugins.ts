@@ -10,7 +10,20 @@ import { env } from "../../config/env";
 
 export async function registerPlugins(server: FastifyInstance) {
   await server.register(fastifyCors, {
-    origin: "*",
+    origin: (origin, cb) => {
+      // Permitir requisições sem origin (ex: Postman, mobile apps)
+      if (!origin) return cb(null, true);
+
+      // Lista de origins permitidos
+      const allowedOrigins = ["http://localhost:3000", "http://localhost:3001"];
+
+      if (allowedOrigins.includes(origin)) {
+        cb(null, true);
+      } else {
+        cb(new Error("Not allowed by CORS"), false);
+      }
+    },
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   });

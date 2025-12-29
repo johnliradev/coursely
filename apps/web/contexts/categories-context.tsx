@@ -9,6 +9,7 @@ type CategoriesContextType = {
   error: string | null;
   selectedCategoryId: number | null;
   setSelectedCategoryId: (id: number | null) => void;
+  refreshCategories: () => Promise<void>;
 };
 
 const CategoriesContext = createContext<CategoriesContextType | undefined>(undefined);
@@ -19,23 +20,25 @@ export const CategoriesProvider = ({ children }: { children: React.ReactNode }) 
   const [error, setError] = useState<string | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
 
+  const fetchCategories = async () => {
+    try {
+      setIsLoading(true);
+      const categories = await categoriesService.getCategories();
+      setCategories(categories);
+      setError(null);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : String(error));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setIsLoading(true);
-        const categories = await categoriesService.getCategories();
-        setCategories(categories);
-      } catch (error) {
-        setError(error instanceof Error ? error.message : String(error));
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchCategories();
   }, []);
 
   return (
-    <CategoriesContext.Provider value={{ categories, isLoading, error, selectedCategoryId, setSelectedCategoryId }}>
+    <CategoriesContext.Provider value={{ categories, isLoading, error, selectedCategoryId, setSelectedCategoryId, refreshCategories: fetchCategories }}>
       {children}
     </CategoriesContext.Provider>
   );

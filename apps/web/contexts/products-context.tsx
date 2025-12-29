@@ -10,6 +10,7 @@ type ProductsContextType = {
   filteredProducts: Product[] | undefined;
   isLoading: boolean;
   error: string | null;
+  refreshUser: () => Promise<void>;
 };
 
 const ProductsContext = createContext<ProductsContextType | undefined>(undefined);
@@ -59,8 +60,21 @@ export const ProductsProvider = ({ children }: { children: React.ReactNode }) =>
     return filtered;
   }, [products, selectedCategoryId, searchQuery]);
 
+  const refreshProducts = async () => {
+    try {
+      setIsLoading(true);
+      const products = await productsService.getProducts();
+      setProducts(products);
+      setError(null);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : String(error));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <ProductsContext.Provider value={{ products, filteredProducts, isLoading, error }}>
+    <ProductsContext.Provider value={{ products, filteredProducts, isLoading, error, refreshUser: refreshProducts }}>
       {children}
     </ProductsContext.Provider>
   );
