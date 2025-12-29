@@ -5,15 +5,24 @@ import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Category } from "@/types/categories";
 import { useCategories } from "@/contexts/categories-context";
+import { useRouter } from "next/navigation";
 
 export const ProductsCard = ({ product }: { product: Product }) => {
   const { categories } = useCategories();
+  const router = useRouter();
   const category = categories?.find(
     (category: Category) => category.id === product.categoryId
   );
 
+  const handleCardClick = () => {
+    router.push(`/products/${product.id}`);
+  };
+
   return (
-    <Card className="overflow-hidden p-0 flex flex-col h-full">
+    <Card
+      className="overflow-hidden p-0 flex flex-col h-full cursor-pointer hover:shadow-lg transition-shadow"
+      onClick={handleCardClick}
+    >
       {/* Image Section - 3/4 of card height */}
       <div
         className="w-full bg-muted flex items-center justify-center overflow-hidden relative"
@@ -55,7 +64,15 @@ export const ProductsCard = ({ product }: { product: Product }) => {
               currency: "USD",
             })}
           </div>
-          <Button className="cursor-pointer shrink-0">Enroll now</Button>
+          <Button
+            className="cursor-pointer shrink-0"
+            onClick={(e) => {
+              e.stopPropagation();
+              router.push(`/products/${product.id}`);
+            }}
+          >
+            Enroll now
+          </Button>
         </div>
       </CardContent>
     </Card>

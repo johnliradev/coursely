@@ -44,4 +44,30 @@ export const authService = {
 
     return response.json();
   },
+
+  register: async (data: {
+    name: string;
+    email: string;
+    phone: string;
+    password: string;
+    role: "USER" | "ADMIN";
+  }) => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const error = await response
+        .json()
+        .catch(() => ({ message: "Registration failed" }));
+      throw new Error(error.message || "Registration failed");
+    }
+
+    return response.json();
+  },
 };

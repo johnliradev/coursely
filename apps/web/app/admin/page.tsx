@@ -33,10 +33,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BookOpen, Users, DollarSign, Plus, Pencil, Trash2 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import { BookOpen, DollarSign, Plus, Pencil, Trash2, LogOut, User, ShoppingBag } from "lucide-react";
+import { ModeToggle } from "@/components/toggle-theme";
 
 export default function AdminPage() {
-  const { user, isAuthenticated } = useUser();
+  const { user, isAuthenticated, logout } = useUser();
   const { products, refreshUser } = useProducts();
   const { categories, refreshCategories } = useCategories();
   const router = useRouter();
@@ -143,6 +154,16 @@ export default function AdminPage() {
     }
   };
 
+  const handleToggleActive = async (id: number, currentActive: boolean) => {
+    try {
+      await adminService.toggleProductActive(id, !currentActive);
+      await refreshUser();
+    } catch (error) {
+      console.error("Error toggling product active status:", error);
+      alert(error instanceof Error ? error.message : "Failed to toggle product status");
+    }
+  };
+
   const handleOpenCategoryDialog = (category?: Category) => {
     if (category) {
       setEditingCategory(category);
@@ -196,19 +217,80 @@ export default function AdminPage() {
     return categories?.find((c: Category) => c.id === categoryId)?.name || "N/A";
   };
 
+  const handleLogout = async () => {
+    await logout();
+    router.push("/");
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   // Calcular métricas (mockado por enquanto)
   const totalCourses = products?.length || 0;
-  const totalStudents = 0; // Não temos dados de estudantes ainda
+  const totalSales = 1247; // Mock - será implementado depois
   const totalRevenue = products?.reduce((sum, p) => sum + (Number(p.price) || 0), 0) || 0;
 
   return (
-    <div className="min-h-screen bg-background p-8">
-      <div className="container mx-auto space-y-8">
-        {/* Header */}
-        <div className="flex items-center gap-2">
-          <BookOpen className="w-6 h-6" />
-          <h1 className="text-3xl font-bold">Admin Panel</h1>
+    <div className="min-h-screen bg-background">
+      {/* Navbar */}
+      <nav className="w-full border-b">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <BookOpen className="w-6 h-6 text-foreground" />
+              <span className="text-xl font-semibold text-foreground">
+                Course<span className="text-orange-500">ly</span>
+                <span className="text-muted-foreground"> | admin</span>
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                    <Avatar className="h-10 w-10">
+                      <AvatarFallback className="bg-primary text-primary-foreground">
+                        {user?.name ? getInitials(user.name) : "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">
+                        {user?.name}
+                      </p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {user?.email}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => router.push("/profile")}>
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Perfil</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} variant="destructive">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Logout</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <ModeToggle />
+            </div>
+          </div>
         </div>
+        <Separator />
+      </nav>
+
+      <div className="container mx-auto p-8 space-y-8">
 
         {/* Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -226,10 +308,10 @@ export default function AdminPage() {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <Users className="w-8 h-8 text-muted-foreground" />
+                <ShoppingBag className="w-8 h-8 text-muted-foreground" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Students</p>
-                  <p className="text-2xl font-bold">{totalStudents.toLocaleString()}</p>
+                  <p className="text-sm text-muted-foreground">Total de Vendas</p>
+                  <p className="text-2xl font-bold">{totalSales.toLocaleString()}</p>
                 </div>
               </div>
             </CardContent>
@@ -280,15 +362,18 @@ export default function AdminPage() {
                         ${Number(product.price).toFixed(2)}
                       </TableCell>
                       <TableCell>
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs ${
+                        <Button
+                          variant={product.active ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => handleToggleActive(product.id, product.active)}
+                          className={
                             product.active
-                              ? "bg-green-500/20 text-green-500"
-                              : "bg-red-500/20 text-red-500"
-                          }`}
+                              ? "bg-green-500 hover:bg-green-600 text-white"
+                              : "bg-red-500/20 hover:bg-red-500/30 text-red-500"
+                          }
                         >
                           {product.active ? "Ativo" : "Inativo"}
-                        </span>
+                        </Button>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">

@@ -26,28 +26,35 @@ export const ProductsProvider = ({ children }: { children: React.ReactNode }) =>
     const fetchProducts = async () => {
       try {
         setIsLoading(true);
-        const products = await productsService.getProducts();
+        setError(null);
+        // Usar query params do backend quando houver filtro de categoria
+        const filters: { categoryId?: number; active?: boolean } = {};
+        if (selectedCategoryId !== null) {
+          filters.categoryId = selectedCategoryId;
+        }
+        // Sempre buscar apenas produtos ativos na página inicial
+        // TODO: Descomentar após verificar se há produtos ativos no banco
+        // filters.active = true;
+        console.log("Fetching products with filters:", filters);
+        const products = await productsService.getProducts(filters);
+        console.log("Products fetched:", products);
         setProducts(products);
       } catch (error) {
+        console.error("Error fetching products:", error);
         setError(error instanceof Error ? error.message : String(error));
       } finally {
         setIsLoading(false);
       }
     };
     fetchProducts();
-  }, []);
+  }, [selectedCategoryId]);
 
   const filteredProducts = useMemo(() => {
     if (!products) return undefined;
 
     let filtered = [...products];
 
-    // Filtrar por categoria
-    if (selectedCategoryId !== null) {
-      filtered = filtered.filter((product) => product.categoryId === selectedCategoryId);
-    }
-
-    // Filtrar por busca
+    // Filtrar por busca (categoria já vem filtrada do backend via query params)
     if (searchQuery.trim() !== "") {
       const query = searchQuery.toLowerCase().trim();
       filtered = filtered.filter(
@@ -58,12 +65,18 @@ export const ProductsProvider = ({ children }: { children: React.ReactNode }) =>
     }
 
     return filtered;
-  }, [products, selectedCategoryId, searchQuery]);
+  }, [products, searchQuery]);
 
   const refreshProducts = async () => {
     try {
       setIsLoading(true);
-      const products = await productsService.getProducts();
+      // Usar os mesmos filtros ao recarregar
+      const filters: { categoryId?: number; active?: boolean } = {};
+      if (selectedCategoryId !== null) {
+        filters.categoryId = selectedCategoryId;
+      }
+      filters.active = true;
+      const products = await productsService.getProducts(filters);
       setProducts(products);
       setError(null);
     } catch (error) {

@@ -147,4 +147,27 @@ export const adminService = {
 
     return response.json();
   },
+
+  toggleProductActive: async (id: number, active: boolean) => {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/products/${id}/active`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ active }),
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response
+        .json()
+        .catch(() => ({ message: "Failed to toggle product active status" }));
+      throw new Error(error.message || "Failed to toggle product active status");
+    }
+
+    return response.json();
+  },
 };

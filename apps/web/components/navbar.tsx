@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export const Navbar = () => {
   const { isAuthenticated, user, logout } = useUser();
@@ -38,12 +39,12 @@ export const Navbar = () => {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
             <BookOpen className="w-6 h-6 text-foreground" />
             <span className="text-xl font-semibold text-foreground">
               Course<span className="text-orange-500">ly</span>
             </span>
-          </div>
+          </Link>
 
           <div className="flex items-center gap-2">
             <Button
