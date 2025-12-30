@@ -21,7 +21,6 @@ enum Role {
 enum OrderStatus {
   PENDING
   PAID
-  SHIPPED
   CANCELLED
 }
 
@@ -73,7 +72,7 @@ model Product {
   description String
   price     Decimal     
   createdAt DateTime @default(now()) @map("created_at")
-  orderItems OrderItem[]
+  orders Order[]
   
   @@index([categoryId])
   @@index([active])
@@ -85,32 +84,20 @@ model Order {
   @@map("orders")
   id        Int      @id @default(autoincrement())
   userId    Int      @map("user_id")
+  productId Int      @map("product_id")
   totalPrice Decimal      @map("total_price")
   status    OrderStatus   @default(PENDING) @map("status")
   createdAt DateTime @default(now()) @map("created_at")
   user      User     @relation(fields: [userId], references: [id])
-  orderItems OrderItem[]
+  product   Product  @relation(fields: [productId], references: [id])
   payment   Payment?
   
   @@index([userId])
+  @@index([productId])
   @@index([status])
   @@index([userId, status])
   @@index([createdAt])
   @@index([userId, createdAt])
-}
-
-model OrderItem {
-  @@map("order_items")
-  id        Int      @id @default(autoincrement())
-  orderId   Int      @map("order_id")
-  productId Int      @map("product_id")
-  quantity  Int      @map("quantity")
-  createdAt DateTime @default(now()) @map("created_at")
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  @@unique([orderId, productId])
-  @@index([orderId])
-  @@index([productId])
 }
 
 model Payment {
